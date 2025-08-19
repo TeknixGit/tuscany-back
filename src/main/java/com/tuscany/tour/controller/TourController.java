@@ -31,6 +31,7 @@ public class TourController {
     public ResponseEntity<TourResponse> create(@Valid @RequestBody TourCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tourService.create(request));
     }
+
     @PostMapping("/{tourId}/main-image/upload")
     public ResponseEntity<String> uploadMainImage(
             @PathVariable Long tourId,

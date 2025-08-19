@@ -70,7 +70,7 @@ public class SecurityConfig {
                                 "/api/tours/search-tour",
                                 "/api/tours/{id}/details",
                                 "/uploads/gallery/**",
-                                "/uploads/main-image/upload")
+                                "/api/tours/main-image/upload")
                         // The above configuration disables CSRF protection for specific endpoints.)
 
                 // This configuration is useful for endpoints that do not require CSRF protection, such as public authentication or registration endpoints, where the client is not yet authenticated.
@@ -88,7 +88,7 @@ public class SecurityConfig {
                  .requestMatchers("/api/tours/search-tour").permitAll()
                 .requestMatchers("/api/tours/{id}/details").permitAll()
                 .requestMatchers("/uploads/gallery/**").permitAll()
-                .requestMatchers("/uploads/main-image/upload").permitAll()
+                .requestMatchers("/api/tours/main-image/upload").permitAll()
                 .requestMatchers("/api/auth/public/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
                 .anyRequest().authenticated())
