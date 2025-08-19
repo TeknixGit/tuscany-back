@@ -253,7 +253,7 @@ public class TourServiceImpl implements TourService {
         }
 
         String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Path uploadPath = Paths.get("uploads/gallery/");
+        Path uploadPath = Paths.get("uploads/tours/");
         Files.createDirectories(uploadPath);
         Path filePath = uploadPath.resolve(filename);
         file.transferTo(filePath);
@@ -261,7 +261,7 @@ public class TourServiceImpl implements TourService {
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new NotFoundException("Tour not found"));
 
-        String publicUrl =baseUrl+ "/uploads/gallery/" + filename;
+        String publicUrl =baseUrl+ "/uploads/tours/" + filename;
 
         //galleryRepository.save(new TourGallery( publicUrl, tour));
         tour.setMainImage(publicUrl);
