@@ -88,6 +88,7 @@ public class SecurityConfig {
                  .requestMatchers("/api/tours/search-tour").permitAll()
                 .requestMatchers("/api/tours/{id}/details").permitAll()
                 .requestMatchers("/uploads/gallery/**").permitAll()
+                .requestMatchers("/uploads/tours/**").permitAll()
                 .requestMatchers("/api/tours/main-image/upload").permitAll()
                 .requestMatchers("/api/auth/public/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
