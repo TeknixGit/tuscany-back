@@ -69,7 +69,8 @@ public class SecurityConfig {
                                 "/api/tours/search",
                                 "/api/tours/search-tour",
                                 "/api/tours/{id}/details",
-                                "/uploads/gallery/**")
+                                "/uploads/gallery/**",
+                                "/uploads/main-image/**")
                         // The above configuration disables CSRF protection for specific endpoints.)
 
                 // This configuration is useful for endpoints that do not require CSRF protection, such as public authentication or registration endpoints, where the client is not yet authenticated.
