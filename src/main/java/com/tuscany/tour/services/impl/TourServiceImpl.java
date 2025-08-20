@@ -1,5 +1,7 @@
 package com.tuscany.tour.services.impl;
 
+import com.cloudinary.Cloudinary;
+import com.tuscany.tour.config.CloudinaryConfig;
 import com.tuscany.tour.exceptions.NotFoundException;
 import com.tuscany.tour.models.*;
 import com.tuscany.tour.repository.TourDetailRepository;
@@ -22,6 +24,8 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map; // ✅ CORRECT
+import com.cloudinary.utils.ObjectUtils;
 
 
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class TourServiceImpl implements TourService {
     private final TourDetailRepository detailRepository;
     private final TourGalleryRepository galleryRepository;
     private final TourMapper mapper;
+    private final Cloudinary cloudinary;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -224,27 +229,27 @@ public class TourServiceImpl implements TourService {
                         .build())
                 .toList();
     }
-
-    public String storeGalleryImage(Long tourId, MultipartFile file) throws IOException {
+ public String storeGalleryImage(Long tourId, MultipartFile file) throws IOException {
         if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Invalid image file");
         }
 
-        String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Path uploadPath = Paths.get("uploads/gallery/");
-        Files.createDirectories(uploadPath);
-        Path filePath = uploadPath.resolve(filename);
-        file.transferTo(filePath);
-
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new NotFoundException("Tour not found"));
 
-        String publicUrl =baseUrl+ "/uploads/gallery/" + filename;
+        // Upload to Cloudinary (optional folder: tours/gallery)
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "tours/gallery",
+                        "public_id", UUID.randomUUID().toString()
+                ));
 
-        //galleryRepository.save(new TourGallery( publicUrl, tour));
-        galleryRepository.save(new TourGallery( publicUrl, tour, SourceType.LOCAL));
+        String imageUrl = (String) uploadResult.get("secure_url");
 
-        return publicUrl;
+        // Save in DB
+        galleryRepository.save(new TourGallery(imageUrl, tour, SourceType.CLOUDINARY));
+
+        return imageUrl;
     }
 
     public String storeMainImage(Long tourId, MultipartFile file) throws IOException {
@@ -252,24 +257,25 @@ public class TourServiceImpl implements TourService {
             throw new IllegalArgumentException("Invalid image file");
         }
 
-        String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
-        Path uploadPath = Paths.get("uploads/tours/");
-        Files.createDirectories(uploadPath);
-        Path filePath = uploadPath.resolve(filename);
-        file.transferTo(filePath);
-
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new NotFoundException("Tour not found"));
 
-        String publicUrl =baseUrl+ "/uploads/tours/" + filename;
+        // Upload to Cloudinary (optional folder: tours/main)
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "tours/main",
+                        "public_id", UUID.randomUUID().toString()
+                ));
 
-        //galleryRepository.save(new TourGallery( publicUrl, tour));
-        tour.setMainImage(publicUrl);
+        String imageUrl = (String) uploadResult.get("secure_url");
+
+        // Update tour
+        tour.setMainImage(imageUrl);
         tourRepository.save(tour);
-        //galleryRepository.save(new TourGallery( publicUrl, tour, SourceType.LOCAL));
 
-        return publicUrl;
+        return imageUrl;
     }
+
     @Override
     public TourDetailResponse updateDetail(Long id, TourDetailRequest request) {
         Tour tour = tourRepository.findById(id)
